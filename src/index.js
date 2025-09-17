@@ -35,7 +35,6 @@ app.get("/api/users", (req, res) => {
 });
 
 //post req
-
 app.post("/api/users", (req, res) => {
   console.log(req.body);
 
@@ -46,10 +45,32 @@ app.post("/api/users", (req, res) => {
   // res.send(newUsers);
 });
 
+//put request
+app.put("/api/users/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+
+  console.log(id);
+
+  const parsedId = parseInt(id);
+  console.log(parsedId);
+
+  if (isNaN(parsedId))
+    return res
+      .status(400)
+      .send({ status: false, message: "Bad Request. Id must be a number" });
+
+  const findUserIndex = users.findIndex((user) => user.id === parsedId);
+  if (findUserIndex === -1) return res.status(404).send("Not found");
+  users[findUserIndex] = { id: parsedId, ...body };
+  res.sendStatus(204);
+});
+
+//get user by id
 app.get("/api/users/:id", async (req, res) => {
   const parseId = parseInt(req.params.id);
-
-  console.log(parseId);
 
   if (isNaN(parseId)) return res.status(400).send({ message: "Bad Request" });
 
