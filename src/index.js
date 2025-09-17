@@ -39,8 +39,11 @@ app.get("/api/users", (req, res) => {
 app.post("/api/users", (req, res) => {
   console.log(req.body);
 
-  const newUsers = users.push(req.body);
-  res.send(newUsers);
+  const newUser = { id: users[users.length - 1].id + 1, ...req.body };
+  users.push(newUser);
+  res.status(201).send(newUser);
+
+  // res.send(newUsers);
 });
 
 app.get("/api/users/:id", async (req, res) => {
