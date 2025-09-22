@@ -4,6 +4,33 @@ const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
+const loggingMiddleWare = (req, res, next) => {
+  console.log(`Logging ${req.method} and ${req.url}`);
+  next();
+};
+
+// app.use(loggingMiddleWare);
+
+//middleware
+const resolveIndex = (req, res, next) => {
+  const {
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+
+  if (isNaN(parsedId))
+    return res
+      .status(400)
+      .send({ status: false, message: "Bad Request. Id must be a number" });
+
+  const findUserIndex = users.findIndex((user) => user.id === parsedId);
+  if (findUserIndex === -1) return res.status(404).send("Not found");
+
+  req.findUserIndex = findUserIndex;
+  next();
+};
+
 const users = [
   { id: 1, username: "randy", displayName: "Ransel" },
   { id: 2, username: "jack", displayName: "Jack" },
@@ -12,8 +39,8 @@ const users = [
   { id: 5, username: "jerry", displayName: "Jerry" },
 ];
 
-app.get("/", (req, res) => {
-  console.log("Home page");
+app.get("/", loggingMiddleWare, (req, res) => {
+  res.send("Homepage");
 });
 
 app.get("/api/users", (req, res) => {
@@ -46,25 +73,10 @@ app.post("/api/users", (req, res) => {
 });
 
 //put request
-app.put("/api/users/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
+app.put("/api/users/:id", resolveIndex, (req, res) => {
+  const { body, findUserIndex } = req;
 
-  console.log(id);
-
-  const parsedId = parseInt(id);
-  console.log(parsedId);
-
-  if (isNaN(parsedId))
-    return res
-      .status(400)
-      .send({ status: false, message: "Bad Request. Id must be a number" });
-
-  const findUserIndex = users.findIndex((user) => user.id === parsedId);
-  if (findUserIndex === -1) return res.status(404).send("Not found");
-  users[findUserIndex] = { id: parsedId, ...body };
+  users[findUserIndex] = { id: users[findUserIndex].id, ...body };
   res.sendStatus(204);
 });
 
