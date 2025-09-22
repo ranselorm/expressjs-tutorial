@@ -81,24 +81,9 @@ app.put("/api/users/:id", resolveIndex, (req, res) => {
 });
 
 //patch request
-app.patch("/api/users/:id", (req, res) => {
-  const {
-    body,
-    params: { id },
-  } = req;
+app.patch("/api/users/:id", resolveIndex, (req, res) => {
+  const { body, findUserIndex } = req;
 
-  console.log(id);
-
-  const parsedId = parseInt(id);
-  console.log(parsedId);
-
-  if (isNaN(parsedId))
-    return res
-      .status(400)
-      .send({ status: false, message: "Bad Request. Id must be a number" });
-
-  const findUserIndex = users.findIndex((user) => user.id === parsedId);
-  if (findUserIndex === -1) return res.status(404).send("Not found");
   users[findUserIndex] = { ...users[findUserIndex], ...body };
   res.sendStatus(204);
 });
